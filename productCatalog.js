@@ -3,11 +3,45 @@ document.getElementById("inputButton").addEventListener('click',function(){
     processSearch(document.getElementById('input').value);
 });
 
+document.getElementById("inputTypeButton").addEventListener('click',function(){
+    processSearchType(document.getElementById("inputType").value);
+});
+
+document.getElementById("inputPriceButton").addEventListener('click',function(){
+    processSearchPrice(document.getElementById("inputPrice").value);
+});
+
 api.searchAllProducts().then(function(value){
     updateTable('allTable',value);
 });
 
 // add function definitions here
+
+function processSearchPrice(searchPrice){
+    var promise = new Promise(function(resolve,reject){
+        if(searchPrice < 0 || searchPrice > 500){
+            reject("Invalid Price");
+        }
+        resolve(searchPrice);
+    }).then(function(val){
+        api.searchProductsByPrice(searchPrice, 50).then(function(val){
+            updateTable('similarTable',val);
+        })
+    }).catch(function(val){
+        alert(val);
+    })
+}
+
+function processSearchType(searchType){
+    api.searchProductsByType(searchType)
+    .then(function(val){
+        updateTable('similarTable',val);
+    }).catch(function(val){
+        alert(val);
+    });
+}
+
+
 function processSearch(searchId){
     api.searchProductById(searchId).then(function(val){
         return Promise.all([api.searchProductsByPrice(val.price,50),api.searchProductsByType(val.type),val]);
